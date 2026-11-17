@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
+import ProjectsPage from "./pages/ProjectsPage";
 import { WorkspaceLayout } from "./components/layout/WorkspaceLayout";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route element={<WorkspaceLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
       </Route>
     </Routes>
   );

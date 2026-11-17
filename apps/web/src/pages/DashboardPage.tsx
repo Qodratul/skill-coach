@@ -4,16 +4,16 @@ import type { Project, Version } from "@skill-coach/shared";
 import { useProfile, useProgress, useProjects, useQuota } from "../api";
 import { CoffeePreview, card } from "../components/landing/shared";
 
-type Kind = Project["skillType"];
-type Item = { id: string; kind: Kind; title: string; isPublic: boolean; score: number | null; delta: number | null; versions: number; date: string; done: boolean; versionNo: number };
+export type Kind = Project["skillType"];
+export type Item = { id: string; goal?: string; none?: boolean; ts?: number; kind: Kind; title: string; isPublic: boolean; score: number | null; delta: number | null; versions: number; date: string; done: boolean; versionNo: number };
 
-const kindMeta: Record<Kind, { label: string; Icon: typeof PanelsTopLeft }> = {
+export const kindMeta: Record<Kind, { label: string; Icon: typeof PanelsTopLeft }> = {
   UI: { label: "Desain UI", Icon: PanelsTopLeft },
   CODE: { label: "Kode", Icon: Code2 },
   ESSAY: { label: "Teks & esai", Icon: NotebookPen },
 };
 // Fallback sample data so the page matches the design before the API has content.
-const sample: Item[] = [
+export const sample: Item[] = [
   { id: "", kind: "UI", title: "Landing page toko kopi", isPublic: true, score: 8, delta: 2, versions: 2, date: "6 Nov 2026", done: true, versionNo: 2 },
   { id: "", kind: "CODE", title: "API daftar tugas", isPublic: false, score: 6.5, delta: null, versions: 1, date: "5 Nov 2026", done: true, versionNo: 1 },
   { id: "", kind: "ESSAY", title: "Esai: Kota yang lebih ramah", isPublic: false, score: 6.8, delta: null, versions: 1, date: "5 Nov 2026", done: true, versionNo: 1 },
@@ -23,11 +23,11 @@ const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("id-ID", { day
 const avg = (scores?: Record<string, number>) => { const v = Object.values(scores ?? {}); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
 const latest = (versions?: Version[]) => versions?.reduce<Version | undefined>((a, b) => (!a || b.versionNumber > a.versionNumber ? b : a), undefined);
 
-function toItem(p: Project): Item {
+export function toItem(p: Project): Item {
   const v = latest(p.versions);
   const score = avg(v?.review?.scores);
   const deltas = Object.values(v?.review?.comparison?.score_delta ?? {});
-  return { id: p.id, kind: p.skillType, title: p.title, isPublic: p.visibility.toUpperCase() === "PUBLIC", score, delta: deltas.length ? deltas.reduce((a, b) => a + b, 0) / deltas.length : null, versions: p._count?.versions ?? p.versions?.length ?? 1, date: fmtDate(v?.createdAt ?? p.createdAt), done: v?.status === "done", versionNo: v?.versionNumber ?? 1 };
+  return { id: p.id, goal: p.goal ?? p.description ?? "", none: !v, ts: Date.parse(v?.createdAt ?? p.createdAt), kind: p.skillType, title: p.title, isPublic: p.visibility.toUpperCase() === "PUBLIC", score, delta: deltas.length ? deltas.reduce((a, b) => a + b, 0) / deltas.length : null, versions: p._count?.versions ?? p.versions?.length ?? 1, date: fmtDate(v?.createdAt ?? p.createdAt), done: v?.status === "done", versionNo: v?.versionNumber ?? 1 };
 }
 
 export default function DashboardPage() {
@@ -139,7 +139,7 @@ function Preview({ kind, versionNo }: { kind: Kind; versionNo: number }) {
   return <div className="relative h-52 overflow-hidden rounded-lg"><div className="origin-top-left scale-[0.62]" style={{ width: "161%" }}><CoffeePreview /></div><span className="absolute right-3 top-2 text-[9px] text-[#77796b]">v{versionNo}</span></div>;
 }
 
-function ProjectCard({ item }: { item: Item }) {
+export function ProjectCard({ item }: { item: Item }) {
   const { label } = kindMeta[item.kind];
   const Vis = item.isPublic ? Globe : Lock;
   return (
