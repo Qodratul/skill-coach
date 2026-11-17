@@ -30,7 +30,7 @@ export default function RegisterPage() {
     setPasswordError(undefined);
     try {
       await register.mutateAsync(parsed.data);
-      navigate("/dashboard");
+      navigate("/onboarding");
     } catch {
       // registration error (e.g. email already used) is reported below via register.error
     }
