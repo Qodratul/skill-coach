@@ -6,6 +6,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import CreateProjectPage from "./pages/CreateProjectPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
 import { WorkspaceLayout } from "./components/layout/WorkspaceLayout";
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/new" element={<CreateProjectPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailPage />} />
       </Route>
     </Routes>
   );
