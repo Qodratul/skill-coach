@@ -8,9 +8,10 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "vitest run",
     "worker": "tsx src/jobs/review-worker.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "prisma generate && tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "start:worker": "node dist/jobs/review-worker.js",
+    "start:all": "node scripts/start-all.cjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed"
