@@ -27,10 +27,21 @@ export const prisma = new PrismaClient(),
   });
 export const app = express();
 app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  next();
+});
 app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use((req, res, next) => {
-  const id = req.header("x-request-id") || `req_${randomUUID()}`;
+  const suppliedId = req.header("x-request-id");
+  const id = suppliedId && /^[a-zA-Z0-9_-]{1,80}$/.test(suppliedId)
+    ? suppliedId
+    : `req_${randomUUID()}`;
   res.setHeader("x-request-id", id);
   (req as any).requestId = id;
   next();
@@ -50,6 +61,22 @@ app.use((req, res, next) => {
 export const authLimit = rateLimit({ windowMs: 60000, limit: 10 }),
   apiLimit = rateLimit({ windowMs: 60000, limit: 120 });
 app.use(apiLimit);
+const trustedFrontendOrigin = new URL(env.FRONTEND_URL).origin;
+export const requireFrontendOrigin = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.header("origin") !== trustedFrontendOrigin)
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: "INVALID_ORIGIN",
+        message: "Permintaan autentikasi berasal dari origin yang tidak diizinkan.",
+      },
+    });
+  next();
+};
 const accessKey = new TextEncoder().encode(env.JWT_SECRET),
   refreshKey = new TextEncoder().encode(env.JWT_REFRESH_SECRET),
   hash = (v: string) => createHash("sha256").update(v).digest("hex");
@@ -105,6 +132,7 @@ export const body =
     next();
   };
 export const boss = new PgBoss(env.DATABASE_URL);
+export const REVIEW_QUEUE = "review-process-job";
 registerHealth(app);
 registerAuth(app);
 registerUsers(app);

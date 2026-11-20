@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   createProjectController,
   deleteProjectController,
+  getProjectController,
   listProjectsController,
   updateProjectController,
 } from "./projects.controller.js";
@@ -26,6 +27,7 @@ export function registerRoutes(app: Express) {
     handle(createProjectController),
   );
   router.get("/projects", guard, handle(listProjectsController));
+  router.get("/projects/:id", guard, handle(getProjectController));
   router.patch(
     "/projects/:id",
     guard,

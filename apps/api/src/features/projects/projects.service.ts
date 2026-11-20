@@ -11,6 +11,18 @@ export function createProject(
   });
 }
 
+export function getProject(projectId: string, userId: string) {
+  return prisma.project.findFirst({
+    where: { id: projectId, userId },
+    include: {
+      versions: {
+        orderBy: { versionNumber: "desc" },
+        include: { review: true },
+      },
+    },
+  });
+}
+
 export async function listProjects(userId: string, cursor?: string) {
   const rows = await prisma.project.findMany({
     where: { userId },

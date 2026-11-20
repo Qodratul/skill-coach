@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { z } from "zod";
 const schema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
@@ -8,7 +9,7 @@ const schema = z.object({
   NEBIUS_BASE_URL: z.string().url().default("https://api.tokenfactory.nebius.com/v1/"),
   NEBIUS_MODEL_TEXT_BASE_URL: z.string().url().optional(),
   NEBIUS_MODEL_VISION_BASE_URL: z.string().url().optional(),
-  NEBIUS_MODEL_TEXT: z.string().default("meta-llama/Meta-Llama-3.1-70B-Instruct"),
+  NEBIUS_MODEL_TEXT: z.string().default("nvidia/Nemotron-3.5-Lightning"),
   NEBIUS_MODEL_VISION: z.string().default("meta-llama/Llama-3.2-11B-Vision-Instruct"),
   NEBIUS_INPUT_COST_PER_MILLION: z.coerce.number().nonnegative().default(0),
   NEBIUS_OUTPUT_COST_PER_MILLION: z.coerce.number().nonnegative().default(0),

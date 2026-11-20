@@ -20,6 +20,11 @@ paths:
     post:
       security: []
       summary: Buat akun
+      parameters:
+        - name: Origin
+          in: header
+          required: true
+          schema: { type: string }
       requestBody:
         required: true
         content:
@@ -33,12 +38,17 @@ paths:
                 password: { type: string, minLength: 10, maxLength: 128 }
                 displayName: { type: string, minLength: 1, maxLength: 100 }
       responses:
-        "201": { description: Account and tokens created }
+        "201": { description: Account and access token returned; refresh token is set as an HttpOnly cookie }
         "422": { $ref: "#/components/responses/Error" }
   /auth/login:
     post:
       security: []
       summary: Masuk
+      parameters:
+        - name: Origin
+          in: header
+          required: true
+          schema: { type: string }
       requestBody:
         required: true
         content:
@@ -50,24 +60,31 @@ paths:
                 email: { type: string, format: email }
                 password: { type: string }
       responses:
-        "200": { description: Access and refresh tokens }
+        "200": { description: Access token returned; refresh token is set as an HttpOnly cookie }
         "401": { $ref: "#/components/responses/Error" }
   /auth/refresh:
     post:
-      security: []
+      security: [{ refreshCookie: [] }]
       summary: Rotasi refresh token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [refreshToken]
-              properties:
-                refreshToken: { type: string }
+      parameters:
+        - name: Origin
+          in: header
+          required: true
+          schema: { type: string }
       responses:
-        "200": { description: Rotated tokens }
+        "200": { description: Access token returned; refresh cookie rotated }
         "401": { $ref: "#/components/responses/Error" }
+  /auth/logout:
+    post:
+      security: [{ refreshCookie: [] }]
+      summary: Cabut refresh token aktif
+      parameters:
+        - name: Origin
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Session revoked and refresh cookie cleared }
   /me:
     get:
       summary: Ambil profil sendiri
@@ -96,7 +113,7 @@ paths:
                 fileName: { type: string, maxLength: 200 }
                 contentType:
                   type: string
-                  enum: [image/png, image/jpeg, image/webp, text/plain, application/pdf]
+                  enum: [image/png, image/jpeg, image/webp, text/plain, application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document]
                 size: { type: integer, minimum: 1, maximum: 5242880 }
       responses:
         "200": { description: Upload URL, key, and required headers }
@@ -134,6 +151,11 @@ paths:
       responses:
         "200": { description: Updated project }
         "404": { $ref: "#/components/responses/Error" }
+    get:
+      summary: Ambil detail proyek beserta versi milik pengguna
+      responses:
+        "200": { description: Project and its versions }
+        "404": { $ref: "#/components/responses/Error" }
     delete:
       summary: Hapus proyek milik pengguna
       responses:
@@ -160,6 +182,14 @@ paths:
         - $ref: "#/components/parameters/Id"
       responses:
         "200": { description: Version and review }
+  /versions/{id}/preview:
+    get:
+      summary: Buat URL sementara pratinjau gambar milik pengguna
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200": { description: Temporary signed image URL }
+        "404": { $ref: "#/components/responses/Error" }
   /versions/{id}/retry:
     post:
       summary: Ulangi review gagal
@@ -187,12 +217,32 @@ paths:
       responses:
         "200": { description: Public portfolio }
         "404": { $ref: "#/components/responses/Error" }
+  /public/p/{username}/{projectId}:
+    get:
+      security: []
+      summary: Ambil cerita proyek yang berstatus publik
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema: { type: string }
+        - in: path
+          name: projectId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Public project story without private submission fields }
+        "404": { $ref: "#/components/responses/Error" }
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: skill_coach_refresh
   parameters:
     Id:
       in: path

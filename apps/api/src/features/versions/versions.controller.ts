@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import {
   createVersion,
+  createVersionPreviewUrl,
   findVersion,
   projectProgress,
   retryVersion,
@@ -30,6 +31,11 @@ export async function getVersionController(req: Request, res: Response) {
       code: "NOT_FOUND",
     });
   res.locals.ok(version);
+}
+
+export async function getVersionPreviewController(req: Request, res: Response) {
+  const request = req as AuthedRequest;
+  res.locals.ok(await createVersionPreviewUrl(request.user.id, String(req.params.id)));
 }
 
 export async function retryVersionController(req: Request, res: Response) {

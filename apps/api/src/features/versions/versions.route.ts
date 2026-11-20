@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   createVersionController,
   getVersionController,
+  getVersionPreviewController,
   projectProgressController,
   retryVersionController,
 } from "./versions.controller.js";
@@ -26,6 +27,7 @@ export function registerRoutes(app: Express) {
               "image/webp",
               "text/plain",
               "application/pdf",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             ])
             .optional(),
         })
@@ -40,6 +42,7 @@ export function registerRoutes(app: Express) {
     handle(createVersionController),
   );
   router.get("/versions/:id", guard, handle(getVersionController));
+  router.get("/versions/:id/preview", guard, handle(getVersionPreviewController));
   router.post("/versions/:id/retry", guard, handle(retryVersionController));
   router.get("/projects/:id/progress", guard, handle(projectProgressController));
   app.use(router);

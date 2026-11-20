@@ -9,10 +9,11 @@ export async function registerAccount(data: {
   password: string;
   displayName: string;
 }) {
+  const { password, ...userData } = data;
   const user = await prisma.user.create({
     data: {
-      ...data,
-      passwordHash: await argon2.hash(data.password),
+      ...userData,
+      passwordHash: await argon2.hash(password),
       quotas: {
         create: {
           periodStart: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -90,4 +91,12 @@ export async function rotateRefreshToken(refreshToken: string) {
     if (error instanceof Error && error.name.startsWith("JWT")) return null;
     throw error;
   }
+}
+
+export async function revokeRefreshToken(refreshToken?: string) {
+  if (!refreshToken) return;
+  await prisma.refreshToken.updateMany({
+    where: { tokenHash: hash(refreshToken), revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
 }

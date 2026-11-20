@@ -55,6 +55,7 @@ export function registerRoutes(app: Express) {
           "image/webp",
           "text/plain",
           "application/pdf",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ]),
         size: z
           .number()

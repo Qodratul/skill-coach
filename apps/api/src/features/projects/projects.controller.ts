@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {
   createProject,
   deleteProject,
+  getProject,
   listProjects,
   updateProject,
 } from "./projects.service.js";
@@ -17,6 +18,17 @@ export async function listProjectsController(req: Request, res: Response) {
   const request = req as AuthedRequest;
   const cursor = typeof req.query.cursor === "string" ? req.query.cursor : undefined;
   res.locals.ok(await listProjects(request.user.id, cursor));
+}
+
+export async function getProjectController(req: Request, res: Response) {
+  const request = req as AuthedRequest;
+  const project = await getProject(String(req.params.id), request.user.id);
+  if (!project)
+    throw Object.assign(Error("Proyek tidak ditemukan."), {
+      status: 404,
+      code: "NOT_FOUND",
+    });
+  res.locals.ok(project);
 }
 
 export async function updateProjectController(req: Request, res: Response) {
