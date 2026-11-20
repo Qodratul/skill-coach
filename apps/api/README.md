@@ -30,7 +30,7 @@ src/
 
 1. Gunakan Node.js 22 dan PostgreSQL 16. Salin `.env.example` menjadi `.env`, isi `DATABASE_URL`, kedua secret JWT (minimal 32 karakter), konfigurasi storage, dan kunci Nebius. Untuk Supabase, gunakan direct connection atau session pooler port `5432` untuk proses API/worker jangka panjang dan migrasi. Transaction pooler port `6543` ditujukan untuk koneksi singkat dan tidak cocok untuk PgBoss.
 2. Dari folder ini jalankan `pnpm install`, `pnpm db:generate`, `pnpm db:migrate`, lalu `pnpm dev`.
-3. Jalankan worker dalam proses terminal terpisah dengan `npm run worker`. Production: build lalu jalankan API dan worker sebagai dua service terpisah (`npm start` dan `npm run start:worker`).
+3. Jalankan worker dalam proses terminal terpisah dengan `npm run worker`. Production pada satu service: build lalu jalankan `npm run start:all`, yang memulai API dan worker bersama-sama.
 
 Migrasi awal berada di `prisma/migrations/`. Untuk local/demo, isi `SEED_EMAIL`, `SEED_USERNAME`, dan `SEED_PASSWORD` di `.env`, lalu jalankan `pnpm db:seed`. Seeder melakukan upsert satu user dan kuota bulan berjalan, serta menolak berjalan saat `NODE_ENV=production`.
 
@@ -56,5 +56,5 @@ Request body divalidasi Zod; ukuran JSON dibatasi 1 MB. Error konsisten berbentu
 - Feedback mendukung satu rating per review/pengguna. Worker menyimpan jumlah token dari respons Nebius. Isi `NEBIUS_INPUT_COST_PER_MILLION` dan `NEBIUS_OUTPUT_COST_PER_MILLION` sesuai tarif aktif untuk mengaktifkan estimasi biaya; nilai default 0.
 - Integrasi Nebius memakai endpoint OpenAI-compatible `chat.completions`. `NEBIUS_MODEL_TEXT_BASE_URL` dan `NEBIUS_MODEL_VISION_BASE_URL` dapat menunjuk endpoint berbeda; jika tidak diisi, keduanya memakai `NEBIUS_BASE_URL` (default `https://api.tokenfactory.nebius.com/v1/`). Isi model ID yang tersedia pada akun di `NEBIUS_MODEL_TEXT` dan `NEBIUS_MODEL_VISION`.
 - Worker mengirim gambar sebagai data URL base64 dan meminta JSON mode untuk model teks. Respons model vision tetap divalidasi sebagai JSON oleh backend tanpa mengandalkan `response_format`, karena dukungan structured output berbeda antar model.
-- Refresh token hanya dikirim lewat cookie HttpOnly; origin auth harus sama dengan `FRONTEND_URL`. Untuk panduan Railway, lihat [`docs/RAILWAY_DEPLOYMENT.md`](../../docs/RAILWAY_DEPLOYMENT.md).
+- Refresh token hanya dikirim lewat cookie HttpOnly; origin auth harus sama dengan `FRONTEND_URL`. Untuk panduan deploy Railway + Vercel, lihat [`docs/RAILWAY_DEPLOYMENT.md`](../../docs/RAILWAY_DEPLOYMENT.md).
 - Referensi kontrak: `docs/PRD Teknis Backend - Skill Coach.md` pada root repo.
